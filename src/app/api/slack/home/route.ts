@@ -1,29 +1,24 @@
 import { buildSlackLink } from "@/lib/auth";
-import { buildSlackPayloadResponse } from "@/lib/slack";
+import { buildSlackHomeView } from "@/lib/slack";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const userId = url.searchParams.get("user_id") || "";
   const teamId = url.searchParams.get("team_id") || "";
+  const userName = url.searchParams.get("user_name") || userId;
 
   const link = buildSlackLink({
     userId,
     teamId,
-    userName: url.searchParams.get("user_name") || userId,
+    userName,
     imageUrl: "",
     source: "home_tab",
   });
 
-  return buildSlackPayloadResponse({
-    blocks: [
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `ホームタブからログインリンクを発行できます。\n<${link}|ログインリンクを開く>`,
-        },
-      },
-    ],
-    text: `ログインリンク: ${link}`,
-  });
+  return Response.json(
+    buildSlackHomeView({
+      displayName: userName,
+      loginLink: link,
+    }),
+  );
 }

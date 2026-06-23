@@ -1,49 +1,52 @@
 {
-  "display_information": {
-    "name": "Slack Simple Login PoC",
-    "description": "PoC: issue short-lived login links from Slack and sign into a Vercel web app.",
-    "background_color": "#08111f"
-  },
-  "features": {
-    "bot_user": {
-      "display_name": "SimpleLoginBot",
-      "always_online": false
+    "display_information": {
+        "name": "Slack Simple Login PoC",
+        "description": "PoC: issue short-lived login links from Slack and sign into a Vercel web app.",
+        "background_color": "#08111f"
     },
-    "slash_commands": [
-      {
-        "command": "/login",
-        "url":"https://<your-app>/api/slack/link",
-        "description": "Issue a short-lived login link for the PoC web app",
-        "should_escape": false
-      }
-    ]
-  },
-  "oauth_config": {
-    "scopes": {
-      "bot": [
-        "commands",
-        "chat:write",
-        "users:read"
-      ]
+    "features": {
+        "app_home": {
+            "home_tab_enabled": true,
+            "messages_tab_enabled": false,
+            "messages_tab_read_only_enabled": true
+        },
+        "bot_user": {
+            "display_name": "SimpleLoginBot",
+            "always_online": false
+        },
+        "slash_commands": [
+            {
+                "command": "/login",
+                "url": "https://slack-simple-login.vercel.app/api/slack/link",
+                "description": "Issue a short-lived login link for the PoC web app",
+                "should_escape": false
+            }
+        ]
+    },
+    "oauth_config": {
+        "scopes": {
+            "bot": [
+                "commands",
+                "chat:write",
+                "users:read"
+            ]
+        },
+        "pkce_enabled": false
+    },
+    "settings": {
+        "event_subscriptions": {
+            "request_url": "https://slack-simple-login.vercel.app/api/slack/events",
+            "bot_events": [
+                "app_home_opened"
+            ]
+        },
+        "interactivity": {
+            "is_enabled": true,
+            "request_url": "https://slack-simple-login.vercel.app/api/slack/link"
+        },
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": false,
+        "token_rotation_enabled": false,
+        "is_mcp_enabled": false
     }
-  },
-  "settings": {
-    "app_home": {
-      "home_tab_enabled": true,
-      "messages_tab_enabled": false,
-      "messages_tab_read_only_enabled": false
-    },
-    "interactivity": {
-      "is_enabled": true,
-      "request_url": "https://<your-app>/api/slack/link"
-    },
-    "org_deploy_enabled": false,
-    "socket_mode_enabled": false,
-    "event_subscriptions": {
-      "request_url": "https://<your-app>/api/slack/events",
-      "bot_events": [
-        "app_home_opened"
-      ]
-    }
-  }
 }

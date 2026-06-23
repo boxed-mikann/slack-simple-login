@@ -1,49 +1,52 @@
-# Slack Simple Login PoC
+## Slack Simple Login PoC
 
-This app demonstrates issuing short-lived login links from Slack (slash command or App Home) and converting them to a session on a Vercel-hosted Next.js app.
+このアプリは、Slack（スラッシュコマンドや App Home）から短命のログインリンクを発行し、Vercel 上の Next.js アプリにセッションを設定する動作を確認するための PoC（技術検証）です。
 
-Quick setup
+セットアップ（簡易）
 
-1. Copy environment variables:
+1. 環境変数をコピーして編集します:
 
 ```bash
 cp apps/slack-simple-login/.env.example apps/slack-simple-login/.env.local
-# edit .env.local and set real values
+# apps/slack-simple-login/.env.local を編集して実際の値を設定します
 ```
 
-2. For local Slack testing, run a tunnel (ngrok) and set `APP_URL` to your tunnel URL, then set `SLACK_SIGNING_SECRET` and `SLACK_BOT_TOKEN` in the Slack App settings.
+2. ローカルで Slack テストを行う場合はトンネル（例: ngrok）を利用し、`APP_URL` をトンネル URL に設定してください。Slack 側には `SLACK_SIGNING_SECRET` と `SLACK_BOT_TOKEN` を設定します。
 
 ```bash
-# start dev server
+# 開発サーバーを起動
 pnpm --filter slack-simple-login dev
 
-# in another terminal, run ngrok and export the url
+# 別ターミナルで ngrok を起動（例: ポート 33116 を公開）
 ngrok http 33116
 ```
 
-3. Upload Slack manifest
+3. Slack マニフェストをアップロード
 
-- Open Slack App Management → App Manifest → Import Manifest
-- Paste the contents of `apps/slack-simple-login/slack-manifest.json`, replace `https://<your-app>` placeholders with your `APP_URL` (ngrok or Vercel URL), then save.
+- Slack の App Management → App Manifest → Import Manifest を開きます。
+- `apps/slack-simple-login/slack-manifest.json` の内容を貼り付け、`https://<your-app>` を `APP_URL` に置き換えて保存してください。
 
-4. Configure Slack App
+4. Slack アプリの設定
 
-- Interactivity & Shortcuts: set Request URL to `${APP_URL}/api/slack/link`
-- OAuth & Permissions: ensure bot scopes include `commands`, `chat:write`, `users:read`.
-- Slash Commands: `/login` should be registered by the manifest.
+- Interactivity & Shortcuts: Request URL を `${APP_URL}/api/slack/link` に設定します。
+- OAuth & Permissions: Bot スコープに `commands`, `chat:write`, `users:read` を含めます。
+- Slash Commands: `/login` がマニフェストで登録されていることを確認してください。
 
-5. Vercel deployment
+5. Vercel へのデプロイ
 
-- Create a Vercel project for the `apps/slack-simple-login` output (or monorepo setup) and set these Environment Variables in the Vercel dashboard: `APP_URL`, `SLACK_SIGNING_SECRET`, `SLACK_BOT_TOKEN`, `LOGIN_LINK_SECRET`.
-- Deploy; Slack endpoints should point at `https://<your-vercel-app>/api/slack/link`.
+- Vercel で `apps/slack-simple-login` をルートにしたプロジェクトを作成するか、モノレポ設定で出力先を `apps/slack-simple-login` にしてください。
+- Vercel の環境変数に次を追加します: `APP_URL`, `SLACK_SIGNING_SECRET`, `SLACK_BOT_TOKEN`, `LOGIN_LINK_SECRET`。
+- デプロイ後、Slack の Interactivity/Events の URL を `https://<your-vercel-app>/api/slack/link` / `/api/slack/events` に向けてください。
 
-Testing flow
+動作確認手順
 
-1. In Slack, run `/login` → you should receive an ephemeral message containing a login link.
-2. Open the link → it navigates to `${APP_URL}/api/login?token=...` which sets a session cookie and redirects to `/dashboard`.
-3. `/dashboard` shows Slack display name and avatar (fetched via `users.info`).
+1. Slack で `/login` を実行すると、エフェメラルメッセージまたは Home タブからログインリンクが発行されます。
+2. 発行されたリンクを開くと `${APP_URL}/api/login?token=...` にアクセスし、サーバーがセッションクッキーを設定して `/dashboard` にリダイレクトします。
+3. `/dashboard` では `users.info` を使って取得した Slack の表示名とアバターが表示されます。
 
-Notes
+補足
 
-- For PoC we use a static Bot token (no OAuth install flow). For production, implement OAuth and store tokens securely.
-- If you need single-use links or revocation, add a storage backend (Vercel KV, Sheets, or a DB) to track issued tokens.
+- 本 PoC では簡便のため固定の Bot トークンを使用しています（OAuth インストールフローは未実装）。本番運用では OAuth を実装し、トークンを安全に保存してください。
+- 単一使用リンクや失効機能が必要な場合は、Vercel KV やデータベースを追加して発行済みトークンを管理してください。
+
+もし README の文言や注釈の追加、より詳しい手順（Vercel のスクリーンショット等）が必要であれば指示してください。
